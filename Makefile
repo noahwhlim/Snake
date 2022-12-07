@@ -1,4 +1,4 @@
-main: main.cpp
+make: main.cpp board.hpp
 	g++ main.cpp -o main -lncurses
 
 clean:
