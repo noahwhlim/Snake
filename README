@@ -1,0 +1,25 @@
+Name: Wei Hern Lim
+COM S 327 Assignment 2
+
+This is a basic snake game.
+
+Objective
+Collect as many apples (a) as possible.
+
+Rules
+You cannot hit the surrounding walls or your own tail.
+
+Instructions
+Once you run the makefile, you can start the game by typing ./snake
+There are 3 difficulties to choose from: easy, medium, hard
+You can choose the difficulty by adding a flag before launching the game, eg: ./snake easy
+The default difficulty is medium
+Once you start the game, hit any button to begin
+
+Controls
+w: move up
+a: move left
+s: move down
+d: move right
+q: quit game
+
