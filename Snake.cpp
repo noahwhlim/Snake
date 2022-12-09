@@ -5,11 +5,13 @@
 
 using namespace std;
 bool gameOver;
-const int width = 20;
-const int height = 20;
+const int height = 20 + 2;
+const int width = 20 + 2;
 int x, y, fruit_x, fruit_y, score;
 int tail_x[100], tail_y[100];
 int nTail;
+WINDOW *board_win;
+WINDOW *score_win;
 enum eDirecton { STOP = 0, LEFT, RIGHT, UP, DOWN};
 eDirecton dir;
 void setup()
@@ -18,76 +20,91 @@ void setup()
 	dir = STOP;
 	x = width / 2;
 	y = height / 2;
-	fruit_x = rand() % width;
-	fruit_y = rand() % height;
+	fruit_x = rand() % (width - 2) + 1; // rand 1-20 
+	fruit_y = rand() % (height - 2) + 1;
 	score = 0;
 }
 
+void drawBorder()
+{
+    box(board_win, 0, 0);
+	wrefresh(board_win);
+}
+
+void drawScoreBorder()
+{
+	box(score_win, 0, 0);
+	mvwprintw(score_win, 0, 2, "score");
+	wrefresh(score_win);
+}
+
+void init_board()
+{
+	int xMax, yMax;
+	getmaxyx(stdscr, yMax, xMax);
+    board_win = newwin(height, width, 0, 0);
+	score_win = newwin(5, 9, 0, 25);
+	drawBorder();
+	drawScoreBorder();
+}
+
+
+
+void drawScore()
+{
+	werase(score_win);
+	drawScoreBorder();
+	mvwprintw(score_win, 2, 4, "%d", score);
+	wrefresh(score_win);
+
+}
+
+
+
 void draw()
 {
-	erase();
-	for (int i = 0; i < width+2; i++) 
-    {
-        printw("# "); refresh();
-    }
-    printw("\n"); refresh();
 	
-	for (int i = 0; i < height; i++)
-	{
-		for (int j = 0; j < width; j++)
-		{
-			if (j == 0)
-			{
-				printw("# "); refresh();
-			}
-			if (i == y && j == x)
-			{
-				printw("• "); refresh();
-			}
-			else if (i == fruit_y && j == fruit_x)
-			{
-				printw(" "); refresh();
-			}
-			else
-			{
-				bool print = false;
-				for (int k = 0; k < nTail; k++)
-				{
-					if (tail_x[k] == j && tail_y[k] == i)
-					{
-						printw("• "); refresh();
-						print = true;
-					}
-				}
-				if (!print)
-				{
-					printw("  "); refresh();
-				}
-					
-			}
-				
+    werase(board_win); 
+	drawBorder();
 
-			if (j == width - 1)
-			{
-				printw(" #"); refresh();
-			}
-			
-				
-		}
-		printw("\n"); refresh();
+	
+	// print fruit
+	mvwprintw(board_win, fruit_y, fruit_x, "a"); 
+
+	// print head
+	mvwprintw(board_win, y, x, "O"); 
+
+	// print body
+	for (int i = 0; i < nTail; i++)
+	{
+		// mvwaddch(board_win, tail_y[i], tail_x[i], 'o'); 
+		mvwprintw(board_win, tail_y[i], tail_x[i], "o");
 	}
 
-	for (int i = 0; i < width+2; i++)
-	{
-		printw("# "); refresh();
-	}
-	printw("\n"); refresh();
-	printw("Score: %d\n", score); refresh();
+    // for (int i = 1; i < height + 1; i++)
+	// {
+	// 	for (int j = 1; j < width + 1; j++)
+	// 	{
+	// 		if (i == y && j == x)
+	// 		{
+	// 			mvwprintw(board_win, y, x, "•");
+	// 		}
+	// 	}
+	// }
+
+
+	
+	wrefresh(board_win);
+
+	
 }
+
+
+
+
 
 void draw_gameover()
 {
-	erase();
 	printw("┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼\n");
 	printw("███▀▀▀██┼███▀▀▀███┼███▀█▄█▀███┼██▀▀▀\n");
 	printw("██┼┼┼┼██┼██┼┼┼┼┼██┼██┼┼┼█┼┼┼██┼██┼┼┼\n");
@@ -186,12 +203,10 @@ void logic()
 	default:
 		break;
 	}
-	if (x > width || x < 0 || y > height || y < 0)
+	if (x > width - 2 || x < 1 || y > height - 2 || y < 1)
 	{
 		gameOver = true;
 	}
-	// if (x >= width) x = 0; else if (x < 0) x = width - 1;
-	// if (y >= height) y = 0; else if (y < 0) y = height - 1;
 
 	for (int i = 0; i < nTail; i++)
 		if (tail_x[i] == x && tail_y[i] == y)
@@ -199,31 +214,60 @@ void logic()
 
 	if (x == fruit_x && y == fruit_y)
 	{
-		score += 10;
-		fruit_x = rand() % width;
-		fruit_y = rand() % height;
+		score += 1;
+		drawScore();
+		fruit_x = rand() % (width - 2) + 1;
+		fruit_y = rand() % (height - 2) + 1;
 		nTail++;
 	}
 }
-int main()
+
+
+
+int main(int argc, char const *argv[])
 {
-	setup();
-	setlocale(LC_ALL, "");
+	int gameSpeed = 0;
+	if (argc == 1)
+	{
+		gameSpeed = 300;
+	}
+	else if (argc == 2)
+	{
+		if (strcmp(argv[1], "easy") == 0)
+		{
+			gameSpeed = 500;
+		}
+		else if (strcmp(argv[1], "medium") == 0)
+		{
+			gameSpeed = 300;
+		}
+		else if (strcmp(argv[1], "hard") == 0)
+		{
+			gameSpeed = 100;
+		}
+		
+	}
+	
+	srand(time(NULL));
 	initscr();
-	noecho();
+    noecho();
+	curs_set(0);
+	
+	setup();
+	init_board();
+	
 	while (!gameOver)
 	{
 		draw();
 		input();
 		logic();
-		usleep(2000); //sleep(10);
+		timeout(gameSpeed);
+		usleep(2000);
 	}
-	draw_gameover();
-	return 0; 
+	
+	
 
+	endwin();
 
-	// draw
-	// check for input
-		// if no input do nothing
-	// run logic even without input
+	return 0;
 }

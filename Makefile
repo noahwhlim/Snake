@@ -1,5 +1,5 @@
-make: main.cpp board.hpp
-	g++ main.cpp -o main -lncurses
+make: snake.cpp
+	g++ snake.cpp -o snake -lncurses
 
 clean:
 	rm -rf snake
