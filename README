@@ -1,7 +1,7 @@
 Name: Wei Hern Lim
 COM S 327 Assignment 2
 
-This is a basic snake game.
+This is a basic snake game written in C++ using the ncurses library.
 
 Objective
 Collect as many apples (a) as possible.
